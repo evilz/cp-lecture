@@ -111,8 +111,8 @@
         <nav class="pager" aria-label="Navigation des fiches">
           <button type="button" @click="previousPage" :disabled="pageIndex === 1">← Précédent</button>
           <button type="button" @click="markDone">✓ Fiche terminée</button>
-          <p v-if="feedback.page" class="page-feedback" role="status">{{ feedback.page }}</p>
           <button type="button" @click="nextPage">Suivant →</button>
+          <p v-if="feedback.page" class="page-feedback" role="status">{{ feedback.page }}</p>
         </nav>
       </template>
     </div>

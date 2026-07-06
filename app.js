@@ -67,7 +67,8 @@ createApp({
       this.completed[this.currentLetter.lower] = true;
       this.saveState();
       this.playApplause();
-      setTimeout(() => this.nextPage(), 900);
+      const pageAtCompletion = this.pageIndex;
+      setTimeout(() => { if (this.pageIndex === pageAtCompletion) this.nextPage(); }, 900);
     },
     toggleToken(item) {
       this.unlockAudio();
@@ -98,26 +99,59 @@ createApp({
       utterance.voice = voices.find((voice) => voice.lang && voice.lang.toLowerCase().startsWith("fr")) || null;
       window.speechSynthesis.speak(utterance);
     },
-    unlockAudio() { if (!this.audioContext) this.audioContext = new (window.AudioContext || window.webkitAudioContext)(); if (this.audioContext.state === "suspended") this.audioContext.resume(); },
+    unlockAudio() {
+      if (!this.audioContext) {
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            this.audioContext = new AudioContextClass();
+          }
+        } catch (e) {
+          console.error("Impossible d'initialiser l'AudioContext :", e);
+        }
+      }
+      if (this.audioContext && this.audioContext.state === "suspended") {
+        this.audioContext.resume().catch(e => console.error("Impossible de relancer l'AudioContext :", e));
+      }
+    },
     playTone(success) {
       this.unlockAudio();
       const ctx = this.audioContext;
+      if (!ctx) return;
       const now = ctx.currentTime;
       [success ? 523 : 180, success ? 784 : 120].forEach((freq, index) => {
-        const osc = ctx.createOscillator(); const gain = ctx.createGain();
-        osc.frequency.value = freq; osc.type = success ? "sine" : "sawtooth";
-        gain.gain.setValueAtTime(0.0001, now + index * 0.11); gain.gain.exponentialRampToValueAtTime(success ? 0.18 : 0.09, now + index * 0.11 + 0.02); gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.11 + 0.16);
-        osc.connect(gain).connect(ctx.destination); osc.start(now + index * 0.11); osc.stop(now + index * 0.11 + 0.18);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = freq;
+        osc.type = success ? "sine" : "sawtooth";
+        gain.gain.setValueAtTime(0.0001, now + index * 0.11);
+        gain.gain.exponentialRampToValueAtTime(success ? 0.18 : 0.09, now + index * 0.11 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.11 + 0.16);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + index * 0.11);
+        osc.stop(now + index * 0.11 + 0.18);
       });
     },
     playApplause() {
       this.unlockAudio();
-      const ctx = this.audioContext; const now = ctx.currentTime;
+      const ctx = this.audioContext;
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const bufferLength = Math.floor(ctx.sampleRate * 0.08);
       for (let i = 0; i < 18; i += 1) {
-        const source = ctx.createBufferSource(); const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate); const data = buffer.getChannelData(0);
-        for (let j = 0; j < data.length; j += 1) data[j] = (Math.random() * 2 - 1) * (1 - j / data.length);
-        const gain = ctx.createGain(); gain.gain.value = 0.08;
-        source.buffer = buffer; source.connect(gain).connect(ctx.destination); source.start(now + i * 0.035);
+        const source = ctx.createBufferSource();
+        const buffer = ctx.createBuffer(1, bufferLength, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let j = 0; j < data.length; j += 1) {
+          data[j] = (Math.random() * 2 - 1) * (1 - j / data.length);
+        }
+        const gain = ctx.createGain();
+        gain.gain.value = 0.08;
+        source.buffer = buffer;
+        source.connect(gain);
+        gain.connect(ctx.destination);
+        source.start(now + i * 0.035);
       }
     },
     animatePage() { this.pageEffect = "page-turn"; setTimeout(() => { this.pageEffect = ""; }, 520); },
