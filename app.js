@@ -70,7 +70,9 @@ function loadState() {
   try {
     const parsed = JSON.parse(raw);
     state.studentName = parsed.studentName || "";
-    state.lessonIndex = Number.isInteger(parsed.lessonIndex) ? parsed.lessonIndex : 0;
+    state.lessonIndex = Number.isInteger(parsed.lessonIndex)
+      ? Math.min(Math.max(0, parsed.lessonIndex), LESSONS.length - 1)
+      : 0;
     state.completedLessons = parsed.completedLessons || {};
   } catch (_e) {
     // ignore corrupted storage
@@ -174,11 +176,7 @@ function validateReading() {
 
   const target = sanitize(currentLesson().prompt);
   const said = sanitize(state.lastRecognition);
-  const targetWords = target.split(" ").filter(Boolean);
-  const saidWords = new Set(said.split(" ").filter(Boolean));
-  const matchedWords = targetWords.filter((word) => saidWords.has(word)).length;
-  const matchRatio = targetWords.length ? matchedWords / targetWords.length : 0;
-  const success = said && (target === said || matchRatio >= MATCH_THRESHOLD);
+  const success = isReadingValid(target, said, MATCH_THRESHOLD);
 
   if (success) {
     state.completedLessons[state.lessonIndex] = true;
@@ -194,8 +192,22 @@ function validateReading() {
   el.feedbackText.className = "warn";
 }
 
+function isReadingValid(target, said, threshold) {
+  const targetWords = target.split(" ").filter(Boolean);
+  const saidWords = new Set(said.split(" ").filter(Boolean));
+  const matchedWords = targetWords.filter((word) => saidWords.has(word)).length;
+  const matchRatio = targetWords.length ? matchedWords / targetWords.length : 0;
+  return said && (target === said || matchRatio >= threshold);
+}
+
 function nextLesson() {
-  state.lessonIndex = (state.lessonIndex + 1) % LESSONS.length;
+  if (state.lessonIndex >= LESSONS.length - 1) {
+    el.feedbackText.textContent = "Bravo ! Tu as terminé tous les exercices 👏";
+    el.feedbackText.className = "ok";
+    return;
+  }
+
+  state.lessonIndex += 1;
   saveState();
   renderLesson();
 }
