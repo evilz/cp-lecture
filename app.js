@@ -62,7 +62,11 @@ function getSpeechRecognitionConstructor() {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const { studentName, lessonIndex, completedLessons } = state;
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({ studentName, lessonIndex, completedLessons }),
+  );
 }
 
 function loadState() {
