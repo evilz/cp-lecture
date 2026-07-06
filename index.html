@@ -3,45 +3,94 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mon aventure lecture CP</title>
+    <title>Le jardin des syllabes CP</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="app">
-      <header>
-        <h1>Mon aventure lecture CP</h1>
-        <p>
-          Exercices inspirés du fichier de lecture « Monstres en classe ».
-          Objectif : écouter, lire, prononcer et progresser.
-        </p>
-        <p class="source-link">Source pédagogique intégrée à l’application.</p>
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Lecture CP • sons • syllabes</p>
+          <h1>Le jardin des syllabes</h1>
+          <p>
+            Une aventure douce et colorée pour écouter, lire, prononcer et
+            progresser pas à pas avec une mascotte originale.
+          </p>
+          <div class="hero-actions">
+            <button id="readInstructionBtn" type="button">🔊 Consigne</button>
+            <button id="readPromptBtn" type="button">🔊 Modèle</button>
+          </div>
+        </div>
+
+        <figure class="mascot" aria-label="Mascotte Nino le narval">
+          <div class="mascot-bubble">Coucou, je suis Nino !</div>
+          <svg viewBox="0 0 220 220" role="img" aria-labelledby="mascotTitle">
+            <title id="mascotTitle">Nino le narval lecteur</title>
+            <ellipse class="fin back" cx="78" cy="137" rx="25" ry="44" />
+            <ellipse class="body" cx="112" cy="122" rx="72" ry="66" />
+            <path class="belly" d="M68 138c19 42 78 48 108 4-18 18-82 21-108-4Z" />
+            <path class="horn" d="M108 44 136 8l11 51Z" />
+            <path class="horn-stripe" d="M121 27 139 38" />
+            <circle class="eye" cx="91" cy="105" r="17" />
+            <circle class="eye" cx="139" cy="105" r="17" />
+            <circle class="pupil" cx="96" cy="103" r="7" />
+            <circle class="pupil" cx="134" cy="103" r="7" />
+            <path class="smile" d="M96 133c11 14 30 14 41 0" />
+            <circle class="cheek" cx="75" cy="124" r="9" />
+            <circle class="cheek" cx="153" cy="124" r="9" />
+            <ellipse class="fin" cx="167" cy="143" rx="20" ry="34" />
+            <path class="book" d="M78 160h37c8 0 14 5 14 13v18H91c-8 0-13-5-13-13Z" />
+            <path class="book page" d="M129 173c0-8 6-13 14-13h33v18c0 8-5 13-13 13h-34Z" />
+          </svg>
+        </figure>
       </header>
 
       <section class="student-card" aria-label="Suivi élève">
-        <label for="studentName">Prénom</label>
-        <input id="studentName" maxlength="40" placeholder="Ex: Lina" />
-        <button id="saveNameBtn" type="button">Enregistrer</button>
+        <div>
+          <label for="studentName">Ton prénom</label>
+          <input id="studentName" maxlength="40" placeholder="Ex: Lina" />
+        </div>
+        <button id="saveNameBtn" type="button">C’est parti !</button>
         <p id="welcomeMessage" aria-live="polite"></p>
       </section>
 
       <section class="progress-card" aria-label="Progression">
-        <h2>Progression</h2>
-        <div class="progress-row">
-          <progress id="progressBar" max="100" value="0"></progress>
+        <div class="progress-heading">
+          <h2>Ton chemin</h2>
           <span id="progressText">0%</span>
+        </div>
+        <progress id="progressBar" max="100" value="0"></progress>
+      </section>
+
+      <section class="lesson-sheet" aria-label="Fiche de cours">
+        <p class="eyebrow">Fiche de cours</p>
+        <h2 id="courseTitle">J’apprends</h2>
+        <p id="courseGoal"></p>
+        <div class="course-grid">
+          <article>
+            <h3>À retenir</h3>
+            <p id="courseRule"></p>
+          </article>
+          <article>
+            <h3>Exemples</h3>
+            <ul id="courseExamples"></ul>
+          </article>
+          <article>
+            <h3>Astuce de Nino</h3>
+            <p id="courseTip"></p>
+          </article>
         </div>
       </section>
 
       <section class="exercise-card" aria-label="Exercice de lecture">
+        <p class="eyebrow">Mission lecture</p>
         <h2 id="exerciseTitle">Exercice</h2>
         <p id="exerciseInstruction"></p>
-        <p id="exercisePrompt" class="prompt"></p>
+        <div id="exercisePrompt" class="prompt"></div>
 
         <div class="actions">
-          <button id="readInstructionBtn" type="button">🔊 Lire l’énoncé</button>
-          <button id="readPromptBtn" type="button">🔊 Lire le texte</button>
-          <button id="listenBtn" type="button">🎤 Écouter ma prononciation</button>
-          <button id="validateBtn" type="button">✅ Valider</button>
+          <button id="listenBtn" type="button">🎤 Je lis à Nino</button>
+          <button id="validateBtn" type="button">⭐ Valider</button>
         </div>
 
         <p id="recognitionText" aria-live="polite"></p>
@@ -49,8 +98,8 @@
       </section>
 
       <section class="footer-actions">
-        <button id="nextExerciseBtn" type="button">Exercice suivant ➜</button>
-        <button id="resetProgressBtn" type="button">Réinitialiser la progression</button>
+        <button id="nextExerciseBtn" type="button">Mission suivante ➜</button>
+        <button id="resetProgressBtn" type="button">Recommencer</button>
       </section>
     </main>
 
