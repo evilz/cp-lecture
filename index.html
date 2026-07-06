@@ -121,13 +121,26 @@
     <script src="app.js"></script>
     <script>
       (function () {
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", function () {
+            navigator.serviceWorker.register("./sw.js").catch(function (error) {
+              console.error("Impossible d'installer le mode hors ligne :", error);
+            });
+          });
+        }
+
         var warning = document.getElementById('portrait-warning');
         function updateOrientation() {
           var isPortrait = window.matchMedia('(orientation: portrait)').matches;
           warning.setAttribute('aria-hidden', isPortrait ? 'false' : 'true');
         }
         updateOrientation();
-        window.matchMedia('(orientation: portrait)').addEventListener('change', updateOrientation);
+        var orientationQuery = window.matchMedia('(orientation: portrait)');
+        if (orientationQuery.addEventListener) {
+          orientationQuery.addEventListener('change', updateOrientation);
+        } else if (orientationQuery.addListener) {
+          orientationQuery.addListener(updateOrientation);
+        }
       })();
     </script>
   </body>
