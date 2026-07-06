@@ -1,7 +1,6 @@
 # cp-lecture
 
-Application web ludique pour apprendre à lire en CP (PC, tablette, téléphone), basée sur le fichier source :
-https://monstresenclasse.fr/wp-content/uploads/2022/02/fichier-de-lecture-version-0222.pdf
+Application web ludique pour apprendre à lire en CP (PC, tablette, téléphone), basée sur une source pédagogique intégrée.
 
 ## Fonctionnalités
 
