@@ -69,6 +69,6 @@ createApp({
         // Storage can be disabled in private or restricted browser contexts.
       }
     },
-    loadState() { try { const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); this.studentName = parsed.studentName || ""; this.pageIndex = Number.isInteger(parsed.pageIndex) ? parsed.pageIndex : 0; this.completed = parsed.completed || {}; } catch (_e) { this.pageIndex = 0; } },
+    loadState() { try { const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); this.studentName = parsed.studentName || ""; const page = parsed.pageIndex; this.pageIndex = (Number.isInteger(page) && page >= 0 && page <= this.letters.length) ? page : 0; this.completed = parsed.completed || {}; } catch (_e) { this.pageIndex = 0; } },
   },
 }).mount("#app");

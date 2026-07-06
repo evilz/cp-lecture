@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div id="portrait-warning" role="alert" aria-live="assertive" class="portrait-warning">Tourne la tablette en paysage pour profiter d'une fiche en plein écran.</div>
     <div id="app" class="app-shell" :class="{ 'is-onboarding': isOnboarding }">
       <section v-if="isOnboarding" class="page page-onboarding" aria-label="Onboarding enfant">
         <div class="onboarding-copy">
@@ -103,7 +104,7 @@
       </template>
     </div>
 
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

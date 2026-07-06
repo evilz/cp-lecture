@@ -79,8 +79,9 @@ progress { width: 100%; height: 20px; accent-color: var(--green); }
 .teacher-note { grid-column: 1 / 4; margin: 0; font-weight: 900; color: var(--ink); background: #fff8d8; }
 .pager { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; }
 .pager button:nth-child(1), .pager button:nth-child(3), .sound-card button { background: var(--blue); box-shadow: 0 6px 0 var(--blue-dark); }
+.portrait-warning { display: none; }
 @media (orientation: portrait) {
-  body::before { content: "Tourne la tablette en paysage pour profiter d’une fiche en plein écran."; position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 2rem; text-align: center; background: #fff8d8; color: var(--ink); font-size: 1.7rem; font-weight: 900; }
+  .portrait-warning { display: grid; position: fixed; inset: 0; z-index: 10; place-items: center; padding: 2rem; text-align: center; background: #fff8d8; color: var(--ink); font-size: 1.7rem; font-weight: 900; }
 }
 @media (max-width: 900px) {
   body { overflow: auto; }
