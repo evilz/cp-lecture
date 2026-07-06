@@ -49,7 +49,11 @@ createApp({
   mounted() { this.loadState(); },
   watch: { pageIndex() { this.selectedLetters = []; this.selectedSounds = []; this.saveState(); } },
   methods: {
-    startJourney() { this.pageIndex = 1; this.saveState(); },
+    startJourney() {
+      if (!this.studentName) { window.alert("Entre ton prénom pour commencer."); return; }
+      this.pageIndex = 1;
+      this.saveState();
+    },
     previousPage() { if (this.pageIndex > 1) this.pageIndex -= 1; },
     nextPage() { this.pageIndex = this.pageIndex >= this.letters.length ? 1 : this.pageIndex + 1; },
     markDone() { this.completed[this.currentLetter.lower] = true; this.saveState(); this.nextPage(); },
