@@ -16,7 +16,7 @@
           <label for="studentName">Ton prénom</label>
           <div class="name-row">
             <input id="studentName" v-model.trim="studentName" maxlength="40" placeholder="Ex : Lina" @keyup.enter="startJourney" />
-            <button type="button" @click="startJourney">Commencer</button>
+            <button type="button" @click="startJourney" :disabled="!studentName">Commencer</button>
           </div>
           <p class="hint">La première page sert à préparer l’aventure. Ensuite, ton prénom et ta progression restent visibles en haut de chaque fiche.</p>
         </div>
