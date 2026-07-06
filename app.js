@@ -27,6 +27,7 @@ const LESSONS = [
 ];
 
 const STORAGE_KEY = "cpLectureProgressV1";
+const MATCH_THRESHOLD = 0.75;
 
 const state = {
   studentName: "",
@@ -54,7 +55,9 @@ const el = {
   resetProgressBtn: document.getElementById("resetProgressBtn"),
 };
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+function getSpeechRecognitionConstructor() {
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -132,6 +135,7 @@ function speak(text) {
 }
 
 function startRecognition() {
+  const SpeechRecognition = getSpeechRecognitionConstructor();
   if (!SpeechRecognition) {
     el.feedbackText.textContent =
       "Reconnaissance vocale indisponible. Utilise le bouton Valider après lecture avec un adulte.";
@@ -161,13 +165,20 @@ function startRecognition() {
 }
 
 function validateReading() {
+  if (!state.lastRecognition) {
+    el.feedbackText.textContent =
+      "Clique d'abord sur « Écouter ma prononciation », puis valide ta lecture.";
+    el.feedbackText.className = "warn";
+    return;
+  }
+
   const target = sanitize(currentLesson().prompt);
   const said = sanitize(state.lastRecognition);
   const targetWords = target.split(" ").filter(Boolean);
   const saidWords = new Set(said.split(" ").filter(Boolean));
   const matchedWords = targetWords.filter((word) => saidWords.has(word)).length;
   const matchRatio = targetWords.length ? matchedWords / targetWords.length : 0;
-  const success = said && (target === said || matchRatio >= 0.75);
+  const success = said && (target === said || matchRatio >= MATCH_THRESHOLD);
 
   if (success) {
     state.completedLessons[state.lessonIndex] = true;
