@@ -175,7 +175,23 @@ function startRecognition() {
 }
 
 function validateReading() {
+  const SpeechRecognition = getSpeechRecognitionConstructor();
+
   if (!state.lastRecognition) {
+    if (!SpeechRecognition) {
+      const approved = window.confirm(
+        "Reconnaissance vocale indisponible. Valider cet exercice avec un adulte ?",
+      );
+      if (!approved) return;
+
+      state.completedLessons[state.lessonIndex] = true;
+      saveState();
+      renderProgress();
+      el.feedbackText.textContent = "Exercice validé avec un adulte.";
+      el.feedbackText.className = "ok";
+      return;
+    }
+
     el.feedbackText.textContent =
       "Clique d'abord sur « Écouter ma prononciation », puis valide ta lecture.";
     el.feedbackText.className = "warn";
