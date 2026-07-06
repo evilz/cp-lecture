@@ -70,15 +70,21 @@ function loadState() {
   try {
     const parsed = JSON.parse(raw);
     state.studentName = parsed.studentName || "";
-    state.lessonIndex = Number.isInteger(parsed.lessonIndex)
-      ? Math.min(Math.max(0, parsed.lessonIndex), LESSONS.length - 1)
-      : 0;
+    state.lessonIndex = Number.isInteger(parsed.lessonIndex) ? clampLessonIndex(parsed.lessonIndex) : 0;
     state.completedLessons = parsed.completedLessons || {};
   } catch (_e) {
     // ignore corrupted storage
   }
 }
 
+function clampLessonIndex(index) {
+  return Math.min(Math.max(0, index), LESSONS.length - 1);
+}
+
+/**
+ * Normalise le texte pour comparer la lecture orale :
+ * suppression des accents, ponctuation et espaces multiples.
+ */
 function sanitize(str) {
   return String(str)
     .toLowerCase()
@@ -194,10 +200,22 @@ function validateReading() {
 
 function isReadingValid(target, said, threshold) {
   const targetWords = target.split(" ").filter(Boolean);
-  const saidWords = new Set(said.split(" ").filter(Boolean));
-  const matchedWords = targetWords.filter((word) => saidWords.has(word)).length;
+  const saidWords = said.split(" ").filter(Boolean);
+  const matchedWords = orderedMatchedWords(targetWords, saidWords);
   const matchRatio = targetWords.length ? matchedWords / targetWords.length : 0;
   return said && (target === said || matchRatio >= threshold);
+}
+
+function orderedMatchedWords(targetWords, saidWords) {
+  let targetIndex = 0;
+
+  for (let i = 0; i < saidWords.length && targetIndex < targetWords.length; i += 1) {
+    if (saidWords[i] === targetWords[targetIndex]) {
+      targetIndex += 1;
+    }
+  }
+
+  return targetIndex;
 }
 
 function nextLesson() {
