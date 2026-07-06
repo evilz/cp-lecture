@@ -62,8 +62,13 @@ createApp({
     toggleSound(word) { this.selectedSounds = this.selectedSounds.includes(word) ? this.selectedSounds.filter((x) => x !== word) : [...this.selectedSounds, word]; },
     splitWord(word) { return Array.from(word); },
     normalize(value) { return String(value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); },
-    speak(text) { if (!window.speechSynthesis) return; const u = new SpeechSynthesisUtterance(text); u.lang = "fr-FR"; u.rate = 0.82; speechSynthesis.cancel(); speechSynthesis.speak(u); },
-    saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ studentName: this.studentName, pageIndex: this.pageIndex, completed: this.completed })); },
+    saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ studentName: this.studentName, pageIndex: this.pageIndex, completed: this.completed }));
+      } catch (_e) {
+        // Storage can be disabled in private or restricted browser contexts.
+      }
+    },
     loadState() { try { const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); this.studentName = parsed.studentName || ""; this.pageIndex = Number.isInteger(parsed.pageIndex) ? parsed.pageIndex : 0; this.completed = parsed.completed || {}; } catch (_e) { this.pageIndex = 0; } },
   },
 }).mount("#app");
