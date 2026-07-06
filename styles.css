@@ -77,7 +77,7 @@ progress { width: 100%; height: 20px; accent-color: var(--green); }
 .sound-grid button span { font-size: 2rem; }
 .sound-grid button.selected { border-color: var(--green); background: #edffe4; }
 .teacher-note { grid-column: 1 / 4; margin: 0; font-weight: 900; color: var(--ink); background: #fff8d8; }
-.pager { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; }
+.pager { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; align-items: center; }
 .pager button:nth-child(1), .pager button:nth-child(3), .sound-card button { background: var(--blue); box-shadow: 0 6px 0 var(--blue-dark); }
 .portrait-warning { display: none; }
 @media (orientation: portrait) {
@@ -88,4 +88,27 @@ progress { width: 100%; height: 20px; accent-color: var(--green); }
   .app-shell { height: auto; min-height: 100vh; }
   .page-onboarding, .lesson-page, .topbar { grid-template-columns: 1fr; }
   .sound-card, .letter-forms, .exercise-letters, .exercise-words, .exercise-sound, .teacher-note { grid-column: 1; grid-row: auto; }
+}
+.install-help { margin-top: 1rem; max-width: 48rem; border: 3px solid #a7daf8; border-radius: 22px; padding: .9rem 1rem; background: #f1fbff; font-weight: 900; }
+.install-help summary { cursor: pointer; color: var(--blue-dark); }
+.install-help ul { margin: .75rem 0 0; padding-left: 1.25rem; color: var(--ink); line-height: 1.35; }
+.letter-cloud button.correct, .sound-grid button.correct { animation: correct-pop .45s ease; outline: 5px solid var(--green); }
+.letter-cloud button.wrong, .sound-grid button.wrong { animation: wrong-shake .35s ease; outline: 5px solid #ff5c5c; background: #fff0f0; }
+.sound-grid button.correct { border-color: var(--green); background: #edffe4; }
+.page-turn { animation: page-turn .5s ease both; }
+.page-feedback { grid-column: 1 / -1; margin: 0; padding: .65rem .9rem; border-radius: 18px; background: #fff8d8; color: var(--ink); font-weight: 900; text-align: center; }
+@keyframes correct-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.18) rotate(-2deg); }
+  100% { transform: scale(1); }
+}
+@keyframes wrong-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-7px); }
+  50% { transform: translateX(7px); }
+  75% { transform: translateX(-4px); }
+}
+@keyframes page-turn {
+  0% { opacity: .25; transform: translateX(2rem) rotateY(-8deg) scale(.98); }
+  100% { opacity: 1; transform: translateX(0) rotateY(0) scale(1); }
 }

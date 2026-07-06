@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1cb0f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Lecture CP" />
+    <link rel="manifest" href="manifest.webmanifest" />
     <title>Abécédaire CP plein écran</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -20,6 +24,14 @@
             <button type="button" @click="startJourney" :disabled="!studentName">Commencer</button>
           </div>
           <p class="hint">La première page sert à préparer l’aventure. Ensuite, ton prénom et ta progression restent visibles en haut de chaque fiche.</p>
+          <details class="install-help">
+            <summary>Installer sur l’écran d’accueil</summary>
+            <ul>
+              <li><strong>iPad / iPhone :</strong> ouvre le bouton Partager, puis choisis « Sur l’écran d’accueil ».</li>
+              <li><strong>Android :</strong> ouvre le menu du navigateur, puis choisis « Installer l’application » ou « Ajouter à l’écran d’accueil ».</li>
+              <li>Relance ensuite l’icône créée et garde la tablette ou le téléphone en mode paysage.</li>
+            </ul>
+          </details>
         </div>
         <div class="tablet-preview" aria-hidden="true">
           <div class="preview-header"></div>
@@ -40,7 +52,7 @@
           </div>
         </header>
 
-        <main class="page lesson-page" :aria-label="`Fiche pédagogique lettre ${currentLetter.upper}`">
+        <main class="page lesson-page" :class="pageEffect" :aria-label="`Fiche pédagogique lettre ${currentLetter.upper}`">
           <section class="sound-card">
             <div>
               <p class="eyebrow">Le son {{ currentLetter.sound }}</p>
@@ -70,7 +82,7 @@
           <section class="exercise exercise-letters">
             <h3>1. Je pointe toutes les lettres {{ currentLetter.upper }}.</h3>
             <div class="letter-cloud" role="list">
-              <button v-for="(item, i) in currentLetter.letterHunt" :key="`letter-${i}`" type="button" :class="tokenClass(item, currentLetter.lower)" @click="toggleToken(item)">{{ item.value }}</button>
+              <button v-for="(item, i) in currentLetter.letterHunt" :key="`letter-${i}`" type="button" :class="tokenClass(item)" @click="toggleToken(item)">{{ item.value }}</button>
             </div>
           </section>
 
@@ -86,7 +98,7 @@
           <section class="exercise exercise-sound">
             <h3>3. Je pointe quand j’entends {{ currentLetter.sound }}.</h3>
             <div class="sound-grid">
-              <button v-for="item in currentLetter.soundItems" :key="item.word" type="button" :class="{ selected: selectedSounds.includes(item.word) }" @click="toggleSound(item.word)">
+              <button v-for="item in currentLetter.soundItems" :key="item.word" type="button" :class="soundClass(item)" @click="toggleSound(item)">
                 <span>{{ item.emoji }}</span>
                 <strong>{{ item.word }}</strong>
               </button>
@@ -99,6 +111,7 @@
         <nav class="pager" aria-label="Navigation des fiches">
           <button type="button" @click="previousPage" :disabled="pageIndex === 1">← Précédent</button>
           <button type="button" @click="markDone">✓ Fiche terminée</button>
+          <p v-if="feedback.page" class="page-feedback" role="status">{{ feedback.page }}</p>
           <button type="button" @click="nextPage">Suivant →</button>
         </nav>
       </template>
