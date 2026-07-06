@@ -27,6 +27,8 @@ const LESSONS = [
 ];
 
 const STORAGE_KEY = "cpLectureProgressV1";
+const SPEECH_RATE = 0.95;
+// 75% des mots (dans l'ordre) doivent correspondre pour valider la prononciation.
 const MATCH_THRESHOLD = 0.75;
 
 const state = {
@@ -137,7 +139,7 @@ function speak(text) {
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "fr-FR";
-  utterance.rate = 0.95;
+  utterance.rate = SPEECH_RATE;
   speechSynthesis.cancel();
   speechSynthesis.speak(utterance);
 }
