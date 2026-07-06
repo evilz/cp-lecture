@@ -57,6 +57,7 @@ const LESSONS = [
 ];
 
 const STORAGE_KEY = "cpLectureProgressV2";
+const LEGACY_STORAGE_KEY = "cpLectureProgressV1";
 const SPEECH_RATE = 0.82;
 const MATCH_THRESHOLD = 0.68;
 
@@ -81,19 +82,27 @@ function clampLessonIndex(index) { return Math.min(Math.max(0, index), LESSONS.l
 function currentLesson() { return LESSONS[state.lessonIndex] || LESSONS[0]; }
 
 function saveState() {
-  const { studentName, lessonIndex, completedLessons } = state;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ studentName, lessonIndex, completedLessons }));
+  try {
+    const { studentName, lessonIndex, completedLessons } = state;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ studentName, lessonIndex, completedLessons }));
+  } catch (_e) {
+    // Storage can be disabled in private or restricted browser contexts.
+  }
 }
 
 function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
   try {
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (!raw) return;
     const parsed = JSON.parse(raw);
     state.studentName = parsed.studentName || "";
     state.lessonIndex = Number.isInteger(parsed.lessonIndex) ? clampLessonIndex(parsed.lessonIndex) : 0;
     state.completedLessons = parsed.completedLessons || {};
-  } catch (_e) { /* ignore corrupted storage */ }
+
+    if (!localStorage.getItem(STORAGE_KEY)) saveState();
+  } catch (_e) {
+    // Ignore corrupted or disabled storage so the app can still run.
+  }
 }
 
 function sanitize(str) {
@@ -108,10 +117,24 @@ function phoneticToken(token) {
 }
 
 function tokenMatches(expected, heard) {
-  if (expected === heard) return true;
   const a = phoneticToken(expected);
   const b = phoneticToken(heard);
-  return a === b || a.includes(b) || b.includes(a);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  if (Math.min(a.length, b.length) < 3) return false;
+  return levenshteinDistance(a, b) <= 1;
+}
+
+function levenshteinDistance(a, b) {
+  const rows = Array.from({ length: a.length + 1 }, (_, index) => [index]);
+  for (let j = 1; j <= b.length; j += 1) rows[0][j] = j;
+  for (let i = 1; i <= a.length; i += 1) {
+    for (let j = 1; j <= b.length; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      rows[i][j] = Math.min(rows[i - 1][j] + 1, rows[i][j - 1] + 1, rows[i - 1][j - 1] + cost);
+    }
+  }
+  return rows[a.length][b.length];
 }
 
 function completionPercent() {
@@ -130,21 +153,27 @@ function renderProgress() {
 }
 
 function renderCourse(lesson) {
-  el.courseTitle.textContent = lesson.title;
-  el.courseGoal.textContent = lesson.course.goal;
-  el.courseRule.textContent = lesson.course.rule;
-  el.courseTip.textContent = lesson.course.tip;
+  const course = lesson.course || {};
+  el.courseTitle.textContent = lesson.title || "J’apprends";
+  el.courseGoal.textContent = course.goal || "";
+  el.courseRule.textContent = course.rule || "";
+  el.courseTip.textContent = course.tip || "";
   el.courseExamples.innerHTML = "";
-  lesson.course.examples.forEach((example) => {
+  (course.examples || []).forEach((example) => {
     const li = document.createElement("li");
     li.textContent = example;
     el.courseExamples.appendChild(li);
   });
 }
 
+function displayTokens(text) {
+  if (!text) return [];
+  return String(text).split(/\s+-\s+|\s+/).filter(Boolean);
+}
+
 function renderPrompt(text) {
   el.exercisePrompt.innerHTML = "";
-  promptTokens(text).forEach((token) => {
+  displayTokens(text).forEach((token) => {
     const span = document.createElement("span");
     span.className = "prompt-token";
     span.textContent = token;
@@ -191,24 +220,51 @@ function startRecognition() {
   recognition.maxAlternatives = 5;
   state.lastRecognition = "";
   el.recognitionText.textContent = "Nino écoute... lis lentement chaque bulle.";
+  let hasError = false;
 
   recognition.onresult = (event) => {
-    const alternatives = Array.from(event.results).flatMap((result) => Array.from(result).map((item) => item.transcript));
-    state.lastRecognition = chooseBestTranscript(alternatives, currentLesson().prompt);
-    el.recognitionText.textContent = `Nino a entendu : ${state.lastRecognition}`;
-    saveState();
+    const transcript = transcriptFromResults(event.results, currentLesson().prompt, false);
+    if (transcript) el.recognitionText.textContent = `Nino entend peut-être : ${transcript}`;
+
+    const finalTranscript = transcriptFromResults(event.results, currentLesson().prompt, true);
+    if (finalTranscript) {
+      state.lastRecognition = finalTranscript;
+      el.recognitionText.textContent = `Nino a entendu : ${state.lastRecognition}`;
+    }
   };
-  recognition.onerror = () => { el.recognitionText.textContent = "Nino n’a pas bien entendu. Rapproche-toi et réessaie."; };
+  recognition.onerror = (event) => {
+    hasError = true;
+    el.recognitionText.textContent = event.error === "not-allowed"
+      ? "Accès au micro refusé. Active-le dans les paramètres du navigateur."
+      : "Nino n’a pas bien entendu. Rapproche-toi et réessaie.";
+  };
   recognition.onend = () => {
-    if (!state.lastRecognition) el.recognitionText.textContent = "Aucun son capté. Essaie encore ou lis avec un adulte.";
+    if (!state.lastRecognition && !hasError) {
+      el.recognitionText.textContent = "Aucun son capté. Essaie encore ou lis avec un adulte.";
+    }
   };
   recognition.start();
 }
 
-function chooseBestTranscript(transcripts, targetPrompt) {
+function transcriptFromResults(results, targetPrompt, finalOnly) {
+  return Array.from(results)
+    .filter((result) => !finalOnly || result.isFinal)
+    .map((result, index) => chooseBestTranscript(
+      Array.from(result).map((item) => item.transcript),
+      targetPrompt,
+      index,
+    ))
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+}
+
+function chooseBestTranscript(transcripts, targetPrompt, segmentIndex = 0) {
   const target = promptTokens(targetPrompt);
+  const segmentTarget = target.slice(segmentIndex, segmentIndex + 1);
+  const scoringTarget = segmentTarget.length ? segmentTarget : target;
   return transcripts.reduce((best, transcript) => {
-    const score = readingScore(target, promptTokens(transcript));
+    const score = readingScore(scoringTarget, promptTokens(transcript));
     return score > best.score ? { text: transcript, score } : best;
   }, { text: transcripts[0] || "", score: -1 }).text;
 }
@@ -236,11 +292,19 @@ function validateReading() {
 function readingScore(targetWords, saidWords) {
   if (!targetWords.length || !saidWords.length) return 0;
   let matched = 0;
-  const remaining = [...saidWords];
+  let saidIndex = 0;
+
   targetWords.forEach((target) => {
-    const index = remaining.findIndex((word) => tokenMatches(target, word));
-    if (index >= 0) { matched += 1; remaining.splice(index, 1); }
+    while (saidIndex < saidWords.length) {
+      const heard = saidWords[saidIndex];
+      saidIndex += 1;
+      if (tokenMatches(target, heard)) {
+        matched += 1;
+        break;
+      }
+    }
   });
+
   return matched / targetWords.length;
 }
 

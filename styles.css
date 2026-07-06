@@ -108,7 +108,7 @@ button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--green-dark
 .student-card {
   display: flex;
   flex-wrap: wrap;
-  align-items: end;
+  align-items: flex-end;
   gap: 0.75rem;
 }
 
