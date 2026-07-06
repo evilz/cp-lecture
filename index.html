@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="portrait-warning" role="alert" aria-live="assertive" class="portrait-warning">Tourne la tablette en paysage pour profiter d'une fiche en plein écran.</div>
+    <div id="portrait-warning" role="alert" aria-live="assertive" aria-hidden="true" class="portrait-warning">Tourne la tablette en paysage pour profiter d'une fiche en plein écran.</div>
     <div id="app" class="app-shell" :class="{ 'is-onboarding': isOnboarding }">
       <section v-if="isOnboarding" class="page page-onboarding" aria-label="Onboarding enfant">
         <div class="onboarding-copy">
@@ -106,5 +106,16 @@
 
     <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
     <script src="app.js"></script>
+    <script>
+      (function () {
+        var warning = document.getElementById('portrait-warning');
+        function updateOrientation() {
+          var isPortrait = window.matchMedia('(orientation: portrait)').matches;
+          warning.setAttribute('aria-hidden', isPortrait ? 'false' : 'true');
+        }
+        updateOrientation();
+        window.matchMedia('(orientation: portrait)').addEventListener('change', updateOrientation);
+      })();
+    </script>
   </body>
 </html>
