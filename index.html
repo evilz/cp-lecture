@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mon aventure lecture CP</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <h1>Mon aventure lecture CP</h1>
+        <p>
+          Exercices inspirés du fichier de lecture « Monstres en classe ».
+          Objectif : écouter, lire, prononcer et progresser.
+        </p>
+        <a
+          class="source-link"
+          href="https://monstresenclasse.fr/wp-content/uploads/2022/02/fichier-de-lecture-version-0222.pdf"
+          target="_blank"
+          rel="noreferrer"
+          >Voir la source pédagogique</a
+        >
+      </header>
+
+      <section class="student-card" aria-label="Suivi élève">
+        <label for="studentName">Prénom</label>
+        <input id="studentName" maxlength="40" placeholder="Ex: Lina" />
+        <button id="saveNameBtn" type="button">Enregistrer</button>
+        <p id="welcomeMessage" aria-live="polite"></p>
+      </section>
+
+      <section class="progress-card" aria-label="Progression">
+        <h2>Progression</h2>
+        <div class="progress-row">
+          <progress id="progressBar" max="100" value="0"></progress>
+          <span id="progressText">0%</span>
+        </div>
+      </section>
+
+      <section class="exercise-card" aria-label="Exercice de lecture">
+        <h2 id="exerciseTitle">Exercice</h2>
+        <p id="exerciseInstruction"></p>
+        <p id="exercisePrompt" class="prompt"></p>
+
+        <div class="actions">
+          <button id="readInstructionBtn" type="button">🔊 Lire l’énoncé</button>
+          <button id="readPromptBtn" type="button">🔊 Lire le texte</button>
+          <button id="listenBtn" type="button">🎤 Écouter ma prononciation</button>
+          <button id="validateBtn" type="button">✅ Valider</button>
+        </div>
+
+        <p id="recognitionText" aria-live="polite"></p>
+        <p id="feedbackText" aria-live="polite"></p>
+      </section>
+
+      <section class="footer-actions">
+        <button id="nextExerciseBtn" type="button">Exercice suivant ➜</button>
+        <button id="resetProgressBtn" type="button">Réinitialiser la progression</button>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
