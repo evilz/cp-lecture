@@ -3,106 +3,119 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Le jardin des syllabes CP</title>
+    <title>Abécédaire CP plein écran</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="app">
-      <header class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Lecture CP • sons • syllabes</p>
-          <h1>Le jardin des syllabes</h1>
-          <p>
-            Une aventure douce et colorée pour écouter, lire, prononcer et
-            progresser pas à pas avec une mascotte originale.
-          </p>
-          <div class="hero-actions">
-            <button id="readInstructionBtn" type="button" aria-label="Lire la consigne à voix haute">🔊 Consigne</button>
-            <button id="readPromptBtn" type="button" aria-label="Lire le modèle à voix haute">🔊 Modèle</button>
-          </div>
-        </div>
-
-        <figure class="mascot" aria-label="Mascotte Nino le narval">
-          <div class="mascot-bubble">Coucou, je suis Nino !</div>
-          <svg viewBox="0 0 220 220" role="img" aria-labelledby="mascotTitle">
-            <title id="mascotTitle">Nino le narval lecteur</title>
-            <ellipse class="fin back" cx="78" cy="137" rx="25" ry="44" />
-            <ellipse class="body" cx="112" cy="122" rx="72" ry="66" />
-            <path class="belly" d="M68 138c19 42 78 48 108 4-18 18-82 21-108-4Z" />
-            <path class="horn" d="M108 44 136 8l11 51Z" />
-            <path class="horn-stripe" d="M121 27 139 38" />
-            <circle class="eye" cx="91" cy="105" r="17" />
-            <circle class="eye" cx="139" cy="105" r="17" />
-            <circle class="pupil" cx="96" cy="103" r="7" />
-            <circle class="pupil" cx="134" cy="103" r="7" />
-            <path class="smile" d="M96 133c11 14 30 14 41 0" />
-            <circle class="cheek" cx="75" cy="124" r="9" />
-            <circle class="cheek" cx="153" cy="124" r="9" />
-            <ellipse class="fin" cx="167" cy="143" rx="20" ry="34" />
-            <path class="book" d="M78 160h37c8 0 14 5 14 13v18H91c-8 0-13-5-13-13Z" />
-            <path class="book page" d="M129 173c0-8 6-13 14-13h33v18c0 8-5 13-13 13h-34Z" />
-          </svg>
-        </figure>
-      </header>
-
-      <section class="student-card" aria-label="Suivi élève">
-        <div>
+    <div id="portrait-warning" role="alert" aria-live="assertive" aria-hidden="true" class="portrait-warning">Tourne la tablette en paysage pour profiter d'une fiche en plein écran.</div>
+    <div id="app" class="app-shell" :class="{ 'is-onboarding': isOnboarding }">
+      <section v-if="isOnboarding" class="page page-onboarding" aria-label="Onboarding enfant">
+        <div class="onboarding-copy">
+          <p class="eyebrow">Lecture CP • alphabet • sons</p>
+          <h1>Mon voyage des lettres</h1>
+          <p class="lead">Installe ta tablette en paysage : chaque écran devient une fiche complète à explorer avec le doigt, les yeux et la voix.</p>
           <label for="studentName">Ton prénom</label>
-          <input id="studentName" maxlength="40" placeholder="Ex: Lina" />
+          <div class="name-row">
+            <input id="studentName" v-model.trim="studentName" maxlength="40" placeholder="Ex : Lina" @keyup.enter="startJourney" />
+            <button type="button" @click="startJourney" :disabled="!studentName">Commencer</button>
+          </div>
+          <p class="hint">La première page sert à préparer l’aventure. Ensuite, ton prénom et ta progression restent visibles en haut de chaque fiche.</p>
         </div>
-        <button id="saveNameBtn" type="button">C’est parti !</button>
-        <p id="welcomeMessage" aria-live="polite"></p>
-      </section>
-
-      <section class="progress-card" aria-label="Progression">
-        <div class="progress-heading">
-          <h2>Ton chemin</h2>
-          <span id="progressText">0%</span>
-        </div>
-        <progress id="progressBar" max="100" value="0"></progress>
-      </section>
-
-      <section class="lesson-sheet" aria-label="Fiche de cours">
-        <p class="eyebrow">Fiche de cours</p>
-        <h2 id="courseTitle">J’apprends</h2>
-        <p id="courseGoal"></p>
-        <div class="course-grid">
-          <article>
-            <h3>À retenir</h3>
-            <p id="courseRule"></p>
-          </article>
-          <article>
-            <h3>Exemples</h3>
-            <ul id="courseExamples"></ul>
-          </article>
-          <article>
-            <h3>Astuce de Nino</h3>
-            <p id="courseTip"></p>
-          </article>
+        <div class="tablet-preview" aria-hidden="true">
+          <div class="preview-header"></div>
+          <div class="preview-letter">A</div>
+          <div class="preview-lines"><span></span><span></span><span></span></div>
         </div>
       </section>
 
-      <section class="exercise-card" aria-label="Exercice de lecture">
-        <p class="eyebrow">Mission lecture</p>
-        <h2 id="exerciseTitle">Exercice</h2>
-        <p id="exerciseInstruction"></p>
-        <div id="exercisePrompt" class="prompt"></div>
+      <template v-else>
+        <header class="topbar" aria-label="Informations et progression">
+          <div>
+            <p class="eyebrow">Bonjour {{ displayName }}</p>
+            <h1>Fiche {{ pageIndex }} / {{ letters.length }} — Lettre {{ currentLetter.upper }}</h1>
+          </div>
+          <div class="progress-panel">
+            <span>{{ progressPercent }}%</span>
+            <progress :value="completedCount" :max="letters.length"></progress>
+          </div>
+        </header>
 
-        <div class="actions">
-          <button id="listenBtn" type="button" aria-label="Démarrer le micro pour lire à Nino">🎤 Je lis à Nino</button>
-          <button id="validateBtn" type="button" aria-label="Valider ma lecture">⭐ Valider</button>
-        </div>
+        <main class="page lesson-page" :aria-label="`Fiche pédagogique lettre ${currentLetter.upper}`">
+          <section class="sound-card">
+            <div>
+              <p class="eyebrow">Le son {{ currentLetter.sound }}</p>
+              <h2>Lettre {{ currentLetter.upper }}</h2>
+              <p class="oral">{{ currentLetter.instruction }}</p>
+              <button type="button" @click="speak(currentLetter.speechText)">🔊 Écouter la consigne</button>
+            </div>
+            <figure class="word-hero">
+              <div class="hero-emoji">{{ currentLetter.emoji }}</div>
+              <figcaption>
+                <strong>{{ currentLetter.word }}</strong>
+                <span>{{ currentLetter.cursive }}</span>
+              </figcaption>
+            </figure>
+          </section>
 
-        <p id="recognitionText" aria-live="polite"></p>
-        <p id="feedbackText" aria-live="polite"></p>
-      </section>
+          <aside class="letter-forms" aria-label="Formes de la lettre">
+            <p class="eyebrow">Je reconnais</p>
+            <div class="forms-grid">
+              <span>{{ currentLetter.lower }}</span>
+              <span>{{ currentLetter.upper }}</span>
+              <span class="school">{{ currentLetter.schoolLower }}</span>
+              <span class="school">{{ currentLetter.schoolUpper }}</span>
+            </div>
+          </aside>
 
-      <section class="footer-actions">
-        <button id="nextExerciseBtn" type="button">Mission suivante ➜</button>
-        <button id="resetProgressBtn" type="button">Recommencer</button>
-      </section>
-    </main>
+          <section class="exercise exercise-letters">
+            <h3>1. Je pointe toutes les lettres {{ currentLetter.upper }}.</h3>
+            <div class="letter-cloud" role="list">
+              <button v-for="(item, i) in currentLetter.letterHunt" :key="`letter-${i}`" type="button" :class="tokenClass(item, currentLetter.lower)" @click="toggleToken(item)">{{ item.value }}</button>
+            </div>
+          </section>
 
+          <section class="exercise exercise-words">
+            <h3>2. Je pointe les lettres {{ currentLetter.upper }} dans les mots.</h3>
+            <div class="word-list">
+              <button v-for="word in currentLetter.words" :key="word" type="button" @click="speak(word)">
+                <span v-for="(char, i) in splitWord(word)" :key="`${word}-${i}`" :class="{ target: normalize(char) === currentLetter.lower }">{{ char }}</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="exercise exercise-sound">
+            <h3>3. Je pointe quand j’entends {{ currentLetter.sound }}.</h3>
+            <div class="sound-grid">
+              <button v-for="item in currentLetter.soundItems" :key="item.word" type="button" :class="{ selected: selectedSounds.includes(item.word) }" @click="toggleSound(item.word)">
+                <span>{{ item.emoji }}</span>
+                <strong>{{ item.word }}</strong>
+              </button>
+            </div>
+          </section>
+
+          <p class="teacher-note">💡 Prononce chaque mot en exagérant les sons pour bien entendre le son recherché.</p>
+        </main>
+
+        <nav class="pager" aria-label="Navigation des fiches">
+          <button type="button" @click="previousPage" :disabled="pageIndex === 1">← Précédent</button>
+          <button type="button" @click="markDone">✓ Fiche terminée</button>
+          <button type="button" @click="nextPage">Suivant →</button>
+        </nav>
+      </template>
+    </div>
+
+    <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
     <script src="app.js"></script>
+    <script>
+      (function () {
+        var warning = document.getElementById('portrait-warning');
+        function updateOrientation() {
+          var isPortrait = window.matchMedia('(orientation: portrait)').matches;
+          warning.setAttribute('aria-hidden', isPortrait ? 'false' : 'true');
+        }
+        updateOrientation();
+        window.matchMedia('(orientation: portrait)').addEventListener('change', updateOrientation);
+      })();
+    </script>
   </body>
 </html>
