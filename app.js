@@ -244,6 +244,7 @@ function nextLesson() {
   }
 
   state.lessonIndex += 1;
+  state.lastRecognition = "";
   saveState();
   renderLesson();
 }
