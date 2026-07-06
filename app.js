@@ -26,7 +26,7 @@ const LESSONS = [
   },
 ];
 
-const storageKey = "cpLectureProgressV1";
+const STORAGE_KEY = "cpLectureProgressV1";
 
 const state = {
   studentName: "",
@@ -57,11 +57,11 @@ const el = {
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 function saveState() {
-  localStorage.setItem(storageKey, JSON.stringify(state));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function loadState() {
-  const raw = localStorage.getItem(storageKey);
+  const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return;
 
   try {
@@ -163,8 +163,11 @@ function startRecognition() {
 function validateReading() {
   const target = sanitize(currentLesson().prompt);
   const said = sanitize(state.lastRecognition);
-
-  const success = said && (said.includes(target) || target.includes(said));
+  const targetWords = target.split(" ").filter(Boolean);
+  const saidWords = new Set(said.split(" ").filter(Boolean));
+  const matchedWords = targetWords.filter((word) => saidWords.has(word)).length;
+  const matchRatio = targetWords.length ? matchedWords / targetWords.length : 0;
+  const success = said && (target === said || matchRatio >= 0.75);
 
   if (success) {
     state.completedLessons[state.lessonIndex] = true;

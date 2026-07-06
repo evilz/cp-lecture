@@ -12,7 +12,7 @@ https://monstresenclasse.fr/wp-content/uploads/2022/02/fichier-de-lecture-versio
 ## Lancer localement
 
 ```bash
-cd /home/runner/work/cp-lecture/cp-lecture
+cd <project-directory>
 python -m http.server 4173
 ```
 
