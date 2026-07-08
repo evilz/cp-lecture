@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#eef7ff",
   "theme_color": "#1cb0f6",
-  "orientation": "landscape",
+  "orientation": "any",
   "description": "Fiches de lecture CP en plein écran pour tablette et téléphone.",
   "icons": [
     {
